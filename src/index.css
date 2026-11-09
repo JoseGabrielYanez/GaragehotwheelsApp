@@ -1,0 +1,248 @@
+@import "tailwindcss";
+
+/* ───────── Variantes personalizadas ───────── */
+/* Tema claro: el tema se guarda en <html data-theme="dark|light"> (ver ThemeContext) */
+@custom-variant light (&:where([data-theme="light"], [data-theme="light"] *));
+/* "Modo móvil": pantallas angostas o táctiles (ahí solo se usa la cámara) */
+@custom-variant compact {
+  @media (max-width: 960px), (hover: none) {
+    @slot;
+  }
+}
+@custom-variant roomy {
+  @media (min-width: 961px) and (hover: hover) {
+    @slot;
+  }
+}
+@custom-variant touch {
+  @media (hover: none) {
+    @slot;
+  }
+}
+
+/* ───────── Tokens de diseño ───────── */
+@theme {
+  /* max-sm = ≤620px · max-md = ≤760px · max-lg = ≤960px */
+  --breakpoint-sm: 621px;
+  --breakpoint-md: 761px;
+  --breakpoint-lg: 961px;
+
+  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Space Grotesk", Inter, ui-sans-serif, system-ui, sans-serif;
+  --font-sport: "Exo 2", "Space Grotesk", Inter, sans-serif;
+
+  --color-accent: #ff5a1f;
+  --color-accent-2: #ffb938;
+}
+
+/* Colores semánticos: cambian solos con el tema (ver :root más abajo) */
+@theme inline {
+  --color-fg: var(--text);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-panel: var(--panel);
+  --color-panel-solid: var(--panel-solid);
+  --color-glass: var(--glass-bg);
+  --color-glass-line: var(--glass-line);
+  --color-glass-hi: var(--glass-hi);
+  --color-cyan: var(--cyan);
+  --color-danger: var(--danger);
+  --color-field: var(--field);
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+    --bg: #090a0f;
+    --panel: rgba(255, 255, 255, 0.045);
+    --panel-solid: #14161e;
+    --text: #f6f4ef;
+    --muted: #9a9fb1;
+    --line: rgba(255, 255, 255, 0.09);
+    --grid: rgba(255, 255, 255, 0.03);
+    --cyan: #4cdcff;
+    --danger: #ff6b81;
+    --field: #14161e;
+    --shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.4);
+    --glass-bg: rgba(255, 255, 255, 0.06);
+    --glass-line: rgba(255, 255, 255, 0.14);
+    --glass-hi: rgba(255, 255, 255, 0.1);
+    --sk-base: rgba(255, 255, 255, 0.06);
+    --sk-shine: rgba(255, 255, 255, 0.1);
+  }
+
+  :root[data-theme="light"] {
+    color-scheme: light;
+    --bg: #f4f2ec;
+    --panel: rgba(255, 255, 255, 0.72);
+    --panel-solid: #ffffff;
+    --text: #14161f;
+    --muted: #5f6675;
+    --line: rgba(20, 24, 34, 0.1);
+    --grid: rgba(20, 24, 34, 0.04);
+    --cyan: #0a8fb3;
+    --field: #ffffff;
+    --shadow: 0 1.5rem 4rem rgba(30, 38, 55, 0.14);
+    --glass-bg: rgba(255, 255, 255, 0.6);
+    --glass-line: rgba(20, 24, 34, 0.12);
+    --glass-hi: rgba(255, 255, 255, 0.85);
+    --sk-base: rgba(20, 24, 34, 0.07);
+    --sk-shine: rgba(255, 255, 255, 0.75);
+  }
+
+  /* Escala fluida: laptops ~14px, 1920px ~16px, monitores grandes hasta 20px */
+  html {
+    font-size: clamp(14px, 10px + 0.3125vw, 20px);
+    -webkit-text-size-adjust: 100%;
+  }
+  @media (max-width: 700px) {
+    html {
+      font-size: 15px;
+    }
+  }
+
+  body {
+    min-width: 20rem;
+    color: var(--text);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    background:
+      radial-gradient(40rem 28rem at 10% -5%, rgba(255, 90, 31, 0.22), transparent 70%),
+      radial-gradient(36rem 26rem at 95% 0%, rgba(76, 220, 255, 0.13), transparent 70%),
+      linear-gradient(var(--grid) 1px, transparent 1px) 0 0 / 3rem 3rem,
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0 / 3rem 3rem,
+      var(--bg);
+    background-attachment: fixed;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+
+  button,
+  [role="button"],
+  label[for],
+  select {
+    cursor: pointer;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--cyan);
+    outline-offset: 2px;
+  }
+}
+
+/* ───────── Utilidades propias ───────── */
+@utility px-page {
+  /* Relleno lateral de toda la app; respeta las muescas de los móviles */
+  padding-left: max(clamp(1rem, 2.5vw, 3rem), env(safe-area-inset-left));
+  padding-right: max(clamp(1rem, 2.5vw, 3rem), env(safe-area-inset-right));
+}
+
+@utility text-gradient {
+  background-image: linear-gradient(135deg, var(--color-accent), var(--color-accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ───────── Componentes reutilizables ───────── */
+@layer components {
+  .field {
+    @apply w-full rounded-xl border border-line bg-panel-solid/80 px-[0.95rem] py-3 text-fg outline-none transition placeholder:text-muted/70 focus:border-accent focus:ring-[3px] focus:ring-accent/20;
+  }
+
+  .btn-primary {
+    @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-linear-to-br from-accent to-accent-2 font-extrabold text-[#160c08] shadow-[0_0.8rem_2rem_rgba(255,90,31,0.28)] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none disabled:grayscale-[0.6] disabled:hover:translate-y-0;
+  }
+
+  .icon-btn {
+    @apply inline-grid size-[2.6rem] place-items-center rounded-xl border border-line bg-panel text-fg backdrop-blur-md transition hover:-translate-y-0.5 hover:border-accent/60 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0;
+  }
+
+  /* Tarjetas de formulario: siempre oscuras (o claras en tema claro) con sus propios tokens */
+  .form-scope {
+    --text: #f3f0ea;
+    --muted: #a9adb8;
+    --line: rgba(255, 255, 255, 0.13);
+    --field: #1c1e26;
+    color: var(--text);
+  }
+  :root[data-theme="light"] .form-scope {
+    --text: #1b1d26;
+    --muted: #5f6675;
+    --line: rgba(20, 24, 34, 0.14);
+    --field: #ffffff;
+  }
+  .form-scope .field {
+    background-color: var(--field);
+    border-radius: 0.85rem;
+  }
+
+  /* Campo con huellas de neumático a la derecha */
+  .field-tread {
+    background-image: linear-gradient(90deg, var(--field) 0%, transparent 60%), url("./assets/tread-white.png");
+    background-size: 55% 100%;
+    background-position: right;
+    background-repeat: no-repeat;
+  }
+  :root[data-theme="light"] .field-tread {
+    background-image: linear-gradient(90deg, var(--field) 0%, transparent 60%), url("./assets/tread-black.png");
+  }
+
+  /* Huellas de neumático: .tread-band sigue el tema; .tread-band-white siempre es blanca (fondos oscuros) */
+  .tread-band {
+    background: url("./assets/tread-white.png") repeat-x center / auto 100%;
+  }
+  :root[data-theme="light"] .tread-band {
+    background-image: url("./assets/tread-black.png");
+  }
+  .tread-band-white {
+    background: url("./assets/tread-white.png") repeat-x center / auto 100%;
+  }
+  /* Avance continuo de la huella: --tile = ancho del patrón, --dur = duración del ciclo */
+  .tread-drive {
+    background-size: var(--tile, 7rem) 100%;
+    animation: tread-drive var(--dur, 0.9s) linear infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tread-drive {
+      animation: none;
+    }
+  }
+
+  /* Skeleton con brillo animado */
+  .skeleton {
+    position: relative;
+    overflow: hidden;
+    background: var(--sk-base);
+  }
+  .skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, var(--sk-shine), transparent);
+    animation: shimmer 1.4s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .skeleton::after {
+      animation: none;
+    }
+  }
+}
+
+@keyframes tread-drive {
+  to {
+    background-position-x: calc(var(--tile, 7rem) * -1);
+  }
+}
+
+@keyframes shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
